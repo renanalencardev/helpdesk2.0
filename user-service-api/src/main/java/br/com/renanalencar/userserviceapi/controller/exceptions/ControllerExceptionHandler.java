@@ -5,6 +5,7 @@ import models.exceptions.ResourceNotFoundException;
 import models.exceptions.StandardError;
 import models.exceptions.ValidationException;
 import org.springframework.boot.context.properties.bind.validation.ValidationErrors;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,8 +15,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.ArrayList;
 
 import static java.time.LocalDateTime.now;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
@@ -48,5 +48,18 @@ public class ControllerExceptionHandler {
             error.addError(fieldError.getField(), fieldError.getDefaultMessage());
         }
         return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<StandardError> handleDataIntegrityViolationException(final DataIntegrityViolationException ex,
+                                                          final HttpServletRequest request) {
+        return ResponseEntity.status(CONFLICT).body(
+                StandardError.builder()
+                        .timestamp(now())
+                        .status(CONFLICT.value())
+                        .error(CONFLICT.getReasonPhrase())
+                        .message(ex.getMessage())
+                        .path(request.getRequestURI())
+                        .build());
     }
 }
