@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import models.exceptions.StandardError;
 import models.requests.CreateUserRequest;
+import models.requests.UpdateUserRequest;
 import models.responses.UserResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -80,4 +81,37 @@ public interface UserController {
     })
     @GetMapping
     ResponseEntity<List<UserResponse>> findAll();
+
+    @Operation(summary = "Atualizar um usuário", description = "Atualiza os dados do usuário com base no ID fornecido")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200", description = "Usuário atualizado com sucesso",
+                    content = @Content(
+                        mediaType = APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = UserResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400", description = "Requisição inválida",
+                    content = @Content(
+                        mediaType = APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = StandardError.class)
+            )),
+            @ApiResponse(
+                    responseCode = "404", description = "Usuário não encontrado",
+                    content = @Content(
+                        mediaType = APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = StandardError.class)
+            )),
+            @ApiResponse(
+                    responseCode = "500", description = "Erro interno do servidor",
+                    content = @Content(
+                        mediaType = APPLICATION_JSON_VALUE,
+                        schema = @Schema(implementation = StandardError.class)
+            ))
+    })
+    @PutMapping("/{id}")
+    ResponseEntity<UserResponse> update(
+            @Parameter(description = "ID do usuário", required = true, example = "68989433c4ed1ad73c2805da")
+            @PathVariable(name = "id") final String id,
+            @Valid @RequestBody final UpdateUserRequest updateUserRequest);
 }
