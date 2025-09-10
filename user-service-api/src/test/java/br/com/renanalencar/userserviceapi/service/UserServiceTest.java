@@ -3,6 +3,7 @@ package br.com.renanalencar.userserviceapi.service;
 import br.com.renanalencar.userserviceapi.entity.User;
 import br.com.renanalencar.userserviceapi.mapper.UserMapper;
 import br.com.renanalencar.userserviceapi.repository.UserRepository;
+import models.exceptions.ResourceNotFoundException;
 import models.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,17 @@ class UserServiceTest {
         assertEquals(UserResponse.class, response.getClass());
         verify(repository, times(1)).findById(anyString());
         verify(mapper, times(1)).fromEntity(any(User.class));
+    }
+
+    @Test
+    void whenCallFindByIdWhithInvalidIdThenThrowResourceNotFoundException() {
+
+        when(repository.findById(anyString())).thenReturn(Optional.empty());
+
+        Assertions.assertThrows(ResourceNotFoundException.class, () -> service.findById("1"));
+
+        verify(repository, times(1)).findById(anyString());
+        verify(mapper, never()).fromEntity(any(User.class));
     }
 
 }
