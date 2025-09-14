@@ -4,6 +4,7 @@ import br.com.renanalencar.userserviceapi.entity.User;
 import br.com.renanalencar.userserviceapi.mapper.UserMapper;
 import br.com.renanalencar.userserviceapi.repository.UserRepository;
 import models.exceptions.ResourceNotFoundException;
+import models.requests.CreateUserRequest;
 import models.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.util.List;
 import java.util.Optional;
 
+import static br.com.renanalencar.userserviceapi.creator.CreatorUtils.generateMock;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -39,7 +41,7 @@ class UserServiceTest {
     @Test
     void whenCallFindByIdWithValidIdThenReturnUserResponse() {
         when(repository.findById(anyString())).thenReturn(Optional.of(new User()));
-        when(mapper.fromEntity(any(User.class))).thenReturn(mock(UserResponse.class));
+        when(mapper.fromEntity(any(User.class))).thenReturn(generateMock(UserResponse.class));
 
         final var response = service.findById("1");
 
@@ -72,6 +74,23 @@ class UserServiceTest {
         assertEquals(UserResponse.class, response.get(0).getClass());
         verify(repository, times(1)).findAll();
         verify(mapper, times(2)).fromEntity(any(User.class));
+    }
+
+    @Test
+    void whenCallSaveThenSucess(){
+        final var request = generateMock(CreateUserRequest.class);
+
+        when(repository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(mapper.fromRequest(any())).thenReturn(new User());
+        when(encoder.encode(anyString())).thenReturn("encryptedPassword");
+        when(repository.save(any(User.class))).thenReturn(new User());
+
+        service.save(request);
+
+        verify(repository, times(1)).findByEmail(request.email());
+        verify(mapper, times(1)).fromRequest(request);
+        verify(encoder, times(1)).encode(request.password());
+        verify(repository, times(1)).save(any(User.class));
     }
 
 }
