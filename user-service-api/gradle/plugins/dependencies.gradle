@@ -52,7 +52,6 @@ dependencies {
     // Biblioteca para geração de dados aleatórios para testes
     implementation 'uk.co.jemos.podam:podam:7.2.6.RELEASE'
 
-    testImplementation 'org.mockito:mockito-core:5.19.0'
 }
 
 dependencyManagement {
