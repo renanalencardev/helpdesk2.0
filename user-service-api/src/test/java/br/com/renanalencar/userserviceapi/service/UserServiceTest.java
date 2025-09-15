@@ -5,6 +5,7 @@ import br.com.renanalencar.userserviceapi.mapper.UserMapper;
 import br.com.renanalencar.userserviceapi.repository.UserRepository;
 import models.exceptions.ResourceNotFoundException;
 import models.requests.CreateUserRequest;
+import models.requests.UpdateUserRequest;
 import models.responses.UserResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -109,5 +110,60 @@ class UserServiceTest {
         verify(encoder, never()).encode(anyString());
         verify(repository, never()).save(any(User.class));
 
+    }
+
+    @Test
+    void whenCallUpdateWithInvalidIdThenThrowResourceNotFoundException() {
+        final var request = generateMock(UpdateUserRequest.class);
+
+        when(repository.findById(anyString())).thenReturn(Optional.empty());
+
+        var exception = Assertions.assertThrows(ResourceNotFoundException.class, () -> service.update("1", request));
+        assertEquals("Objeto não encontrado. Id: " + "1" + ", Tipo: " + UserResponse.class.getSimpleName(), exception.getMessage());
+
+        verify(repository, times(1)).findById(anyString());
+        verify(repository, never()).findByEmail(anyString());
+        verify(mapper, never()).update(any(), any());
+        verify(encoder, never()).encode(anyString());
+        verify(repository, never()).save(any(User.class));
+    }
+
+    @Test
+    void whenCallUpdateWithInvalidEmailThenThrowDataIntegrityViolationException() {
+        final var request = generateMock(UpdateUserRequest.class);
+        final var entity = generateMock(User.class);
+
+        when(repository.findById(anyString())).thenReturn(Optional.of(entity));
+        when(repository.findByEmail(anyString())).thenReturn(Optional.of(entity));
+
+        var exception = Assertions.assertThrows(DataIntegrityViolationException.class, () -> service.update("1", request));
+        assertEquals("Email [ " + request.email() + " ] já cadastrado.", exception.getMessage());
+
+        verify(repository, times(1)).findById(anyString());
+        verify(repository, times(1)).findByEmail(anyString());
+        verify(mapper, never()).update(any(), any());
+        verify(encoder, never()).encode(anyString());
+        verify(repository, never()).save(any(User.class));
+    }
+
+    @Test
+    void whenCallUpdadeWithValidParamsThenGetSuccess() {
+        final var id = "1";
+        final var request = generateMock(UpdateUserRequest.class);
+        final var entity = generateMock(User.class).withId(id);
+
+        when(repository.findById(anyString())).thenReturn(Optional.of(entity));
+        when(repository.findByEmail(anyString())).thenReturn(Optional.of(entity));
+        when(mapper.update(any(), any())).thenReturn(entity);
+        when(repository.save(any(User.class))).thenReturn(entity);
+
+        service.update(id, request);
+
+        verify(repository, times(1)).findById(anyString());
+        verify(repository, times(1)).findByEmail(request.email());
+        verify(mapper, times(1)).update(request, entity);
+        verify(encoder).encode(request.password());
+        verify(repository, times(1)).save(any(User.class));
+        verify(mapper, times(1)).fromEntity(any((User.class)));
     }
 }
