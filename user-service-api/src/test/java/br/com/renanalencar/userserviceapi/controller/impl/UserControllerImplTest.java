@@ -2,21 +2,19 @@ package br.com.renanalencar.userserviceapi.controller.impl;
 
 import br.com.renanalencar.userserviceapi.entity.User;
 import br.com.renanalencar.userserviceapi.repository.UserRepository;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import models.requests.CreateUserRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.time.Instant;
 import java.util.List;
 
 import static br.com.renanalencar.userserviceapi.creator.CreatorUtils.generateMock;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -28,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class UserControllerImplTest {
+    public static final String BASE_URI = "/api/users";
     //A classe MockMvc permite testar endpoints de controllers Spring MVC sem iniciar um servidor HTTP real. Ela simula requisições HTTP e verifica respostas, facilitando testes automatizados de APIs REST.
     @Autowired
     private MockMvc mockMvc;
@@ -69,7 +68,7 @@ class UserControllerImplTest {
 
         userRepository.saveAll(List.of(entity1, entity2));
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get(BASE_URI))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$[0]").isNotEmpty())
@@ -86,12 +85,32 @@ class UserControllerImplTest {
         final var request = generateMock(CreateUserRequest.class).withEmail(validEmail);
 
         mockMvc.perform(
-                post("/api/users")
+                post(BASE_URI)
                     .contentType(APPLICATION_JSON_VALUE)
                     .content(toJson(request)))
                 .andExpect(status().isCreated());
 
         userRepository.deleteByEmail(validEmail);
+    }
+    @Test
+    void testSaveUserWithConflict() throws Exception {
+        final var validEmail = "aaabbb@mail.com";
+        final var entity = generateMock(User.class).withEmail(validEmail);
+        userRepository.save(entity);
+        final var request = generateMock(CreateUserRequest.class).withEmail(validEmail);
+
+        mockMvc.perform(
+                        post(BASE_URI)
+                                .contentType(APPLICATION_JSON_VALUE)
+                                .content(toJson(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("Email [ " + validEmail + " ] já cadastrado."))
+                .andExpect(jsonPath("$.error").value(CONFLICT.getReasonPhrase()))
+                .andExpect(jsonPath("$.path").value(BASE_URI))
+                .andExpect(jsonPath("$.status").value(CONFLICT.value()))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+
+        userRepository.deleteById(entity.getId());
     }
 
     private String toJson(final Object object) throws Exception {
