@@ -14,8 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 
 import static br.com.renanalencar.userserviceapi.creator.CreatorUtils.generateMock;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -111,6 +110,25 @@ class UserControllerImplTest {
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
 
         userRepository.deleteById(entity.getId());
+    }
+
+    @Test
+    void testSaveUserWithNameEmptyThenThrowBadRequest() throws Exception {
+        final var request = generateMock(CreateUserRequest.class).withName("");
+
+        mockMvc.perform(
+                        post(BASE_URI)
+                                .contentType(APPLICATION_JSON_VALUE)
+                                .content(toJson(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Exceção em atributos de validação"))
+                .andExpect(jsonPath("$.error").value("Exceção de validação"))
+                .andExpect(jsonPath("$.path").value(BASE_URI))
+                .andExpect(jsonPath("$.status").value(BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty())
+                .andExpect(jsonPath("$.errors").isArray())
+                .andExpect(jsonPath("$.errors[?(@.fieldName=='name' && @.message=='O campo nome deve ter entre 3 e 50 caracteres')]").exists())
+                .andExpect(jsonPath("$.errors[?(@.fieldName=='name' && @.message=='O campo nome é obrigatório')]").exists());
     }
 
     private String toJson(final Object object) throws Exception {
