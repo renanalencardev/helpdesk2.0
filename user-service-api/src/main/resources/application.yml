@@ -3,7 +3,7 @@ spring:
     name: 'user-service-api'
   data:
     mongodb:
-      uri: 'mongodb+srv://help-desk-user:help-desk-user@cluster-help-desk.klv0wzw.mongodb.net/helpdeskdb?retryWrites=true&w=majority&appName=cluster-help-desk'
+      uri: 'mongodb+srv://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_CLUSTER}/${MONGO_DB}?retryWrites=true&w=majority&appName=cluster-help-desk'
       auto-index-creation: true
 springdoc:
   openapi:
