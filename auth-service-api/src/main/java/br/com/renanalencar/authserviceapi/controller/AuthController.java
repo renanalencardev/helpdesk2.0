@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import models.exceptions.StandardError;
 import models.requests.AuthenticateRequest;
+import models.requests.RefreshTokenRequest;
 import models.responses.AuthenticateResponse;
+import models.responses.RefreshTokenResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,4 +30,15 @@ public interface AuthController {
     })
     @PostMapping("/login")
     ResponseEntity<AuthenticateResponse> authenticate(@Valid @RequestBody final AuthenticateRequest request) throws Exception;
+
+    @Operation(summary = "Atualizar token de autenticação", description = "Atualiza o token de autenticação usando um token de atualização válido")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Token atualizado com sucesso", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = RefreshTokenResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Requisição inválida", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = StandardError.class))),
+            @ApiResponse(responseCode = "401", description = "Token de atualização inválido", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = StandardError.class))),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado", content = @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = StandardError.class))),
+            @ApiResponse(responseCode = "500", description = "Erro interno do servidor", content =  @Content(mediaType = APPLICATION_JSON_VALUE, schema = @Schema(implementation = StandardError.class)))
+    })
+    @PostMapping("/refresh-token")
+    ResponseEntity<RefreshTokenResponse> refreshToken(@Valid @RequestBody final RefreshTokenRequest request);
 }
