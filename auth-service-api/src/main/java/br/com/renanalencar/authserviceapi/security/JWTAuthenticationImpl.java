@@ -1,5 +1,6 @@
-package br.com.renanalencar.authserviceapi.security.dtos;
+package br.com.renanalencar.authserviceapi.security;
 
+import br.com.renanalencar.authserviceapi.security.dtos.UserDetailsDTO;
 import br.com.renanalencar.authserviceapi.utils.JWTUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -36,8 +37,8 @@ public class JWTAuthenticationImpl {
         log.info("Usuário autenticado com sucesso: {}", detailsDTO.getUsername());
         final var token = jwtUtil.generateToken(detailsDTO);
         return AuthenticateResponse.builder()
-                .type("JWT")
-                .token("Bearer " + token)
+                .type("Bearer")
+                .token(token)
                 .build();
     }
 }
