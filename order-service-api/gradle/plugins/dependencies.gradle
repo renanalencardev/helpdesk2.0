@@ -57,9 +57,9 @@ dependencies {
         because('Starter para integração com o Spring Cloud OpenFeign')
     }
 
-    compileOnly('com.h2database:h2') {
-        because('Banco de dados H2 para testes em memória')
-    }
+//    compileOnly('com.h2database:h2') {
+//        because('Banco de dados H2 para testes em memória')
+//    }
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
