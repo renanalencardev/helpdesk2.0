@@ -121,4 +121,40 @@ public interface OrderController {
             @Parameter(description = "Atualizações da ordem de serviço", required = true)
             @Valid @RequestBody UpdateOrderRequest request
             );
+
+    @Operation(summary = "Deletar uma ordem de serviço por ID", description = "Endpoint para buscar uma ordem de serviço pelo seu ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Ordem de serviço deletada", content = @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = OrderResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Requisição inválida",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Recurso não encontrado",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno no servidor",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class))
+            )
+    })
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> deleteById(
+            @NotNull(message = "O id da ordem de serviço deve ser informado.")
+            @Parameter(description = "Id da ordem de serviço", required = true, example = "10")
+            @PathVariable(name = "id")
+            final Long id
+    );
 }
