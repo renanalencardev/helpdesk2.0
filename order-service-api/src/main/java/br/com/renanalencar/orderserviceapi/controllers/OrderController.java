@@ -13,6 +13,7 @@ import models.exceptions.StandardError;
 import models.requests.CreateOderRequest;
 import models.requests.UpdateOrderRequest;
 import models.responses.OrderResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -175,5 +176,28 @@ public interface OrderController {
             @Parameter(description = "Id da ordem de serviço", required = true, example = "10")
             @PathVariable(name = "id")
             final Long id
+    );
+
+    @Operation(summary = "Buscar ordens de serviço paginadas", description = "Endpoint para buscar as ordens de serviço cadastradas no sistema de forma paginada")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ordens de serviço encontradas com sucesso", content = @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = OrderResponse.class))
+            ),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor", content = @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = StandardError.class))
+            )
+    })
+    @GetMapping("/page")
+    ResponseEntity<Page<OrderResponse>> findAllPaginated(
+            @Parameter(description = "Número da página a ser retornada", example = "0")
+            @RequestParam(name = "page", defaultValue = "0") final Integer page,
+            @Parameter(description = "Número de registros por página", example = "12")
+            @RequestParam(name = "size", defaultValue = "12") final Integer linesPerPage,
+            @Parameter(description = "Direção da ordenação (ASC para ascendente ou DESC para descendente)", example = "ASC", required = true)
+            @RequestParam(name = "direction", defaultValue = "ASC") final String direction,
+            @Parameter(description = "Campo pelo qual os registros serão ordenados", example = "id", required = true)
+            @RequestParam(name = "orderBy", defaultValue = "id") final String orderBy
     );
 }
