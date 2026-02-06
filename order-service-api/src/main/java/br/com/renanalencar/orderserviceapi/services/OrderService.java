@@ -7,9 +7,9 @@ import models.responses.OrderResponse;
 
 public interface OrderService {
 
-    Order findById(final String id);
+    Order findById(final Long id);
 
     void save(CreateOderRequest request);
 
-    OrderResponse update(String id, UpdateOrderRequest request);
+    OrderResponse update(Long id, UpdateOrderRequest request);
 }

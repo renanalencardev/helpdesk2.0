@@ -1,6 +1,7 @@
 package br.com.renanalencar.orderserviceapi.controllers.impl;
 
 import br.com.renanalencar.orderserviceapi.controllers.OrderController;
+import br.com.renanalencar.orderserviceapi.mapper.OrderMapper;
 import br.com.renanalencar.orderserviceapi.services.OrderService;
 import lombok.RequiredArgsConstructor;
 import models.requests.CreateOderRequest;
@@ -16,6 +17,13 @@ import static org.springframework.http.HttpStatus.CREATED;
 public class OrderControllerImpl implements OrderController {
 
     private final OrderService orderService;
+    private final OrderMapper mapper;
+
+    @Override
+    public ResponseEntity<OrderResponse> findById(Long id) {
+        return ResponseEntity.ok().body(
+                mapper.fromEntity(orderService.findById(id)));
+    }
 
     @Override
     public ResponseEntity<Void> save(CreateOderRequest request) {
@@ -24,7 +32,7 @@ public class OrderControllerImpl implements OrderController {
     }
 
     @Override
-    public ResponseEntity<OrderResponse> update(final String id, UpdateOrderRequest request) {
+    public ResponseEntity<OrderResponse> update(final Long id, UpdateOrderRequest request) {
         return ResponseEntity.ok().body(orderService.update(id, request));
     }
 }
