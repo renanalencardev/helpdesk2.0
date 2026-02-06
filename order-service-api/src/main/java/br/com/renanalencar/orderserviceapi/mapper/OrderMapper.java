@@ -3,8 +3,11 @@ package br.com.renanalencar.orderserviceapi.mapper;
 import br.com.renanalencar.orderserviceapi.entities.Order;
 import models.enums.OrderStatusEnum;
 import models.requests.CreateOderRequest;
+import models.requests.UpdateOrderRequest;
+import models.responses.OrderResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 import java.time.LocalDateTime;
@@ -24,6 +27,14 @@ public interface OrderMapper {
     @Mapping(target = "createdAt", expression = "java(mapCreatedAt())")
     Order fromRequest(CreateOderRequest request);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "status", source = "request.status", qualifiedByName = "mapStatus")
+    Order fromRequest(@MappingTarget Order entity, UpdateOrderRequest request);
+
+
+    OrderResponse fromEntity(Order save);
+
     @Named("mapStatus")
     default OrderStatusEnum mapStatus(final String status){
         return OrderStatusEnum.toEnum(status);
@@ -32,4 +43,5 @@ public interface OrderMapper {
     default LocalDateTime mapCreatedAt(){
         return LocalDateTime.now();
     }
+
 }
