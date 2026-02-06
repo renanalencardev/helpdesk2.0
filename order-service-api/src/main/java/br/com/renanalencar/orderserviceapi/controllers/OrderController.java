@@ -16,6 +16,8 @@ import models.responses.OrderResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Tag(name = "Order Controller", description = "API para gerenciamento de ordens de serviço")
@@ -56,6 +58,23 @@ public interface OrderController {
             @PathVariable(name = "id")
             final Long id
     );
+
+    @Operation(summary = "Buscar todas as ordens de serviço", description = "Endpoint para buscar todas as ordens de serviço cadastradas no sistema")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ordens de serviço encontradas com sucesso", content = @Content(
+                    mediaType = APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = OrderResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Erro interno no servidor",
+                    content = @Content(
+                            mediaType = APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = StandardError.class))
+            )
+    })
+    @GetMapping
+    ResponseEntity<List<OrderResponse>> findAll();
 
     @Operation(summary = "Criar uma nova ordem de serviço", description = "Endpoint para criar uma nova ordem de serviço no sistema")
     @ApiResponses(value = {
