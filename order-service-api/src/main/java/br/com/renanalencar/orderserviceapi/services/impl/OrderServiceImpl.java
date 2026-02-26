@@ -1,5 +1,6 @@
 package br.com.renanalencar.orderserviceapi.services.impl;
 
+import br.com.renanalencar.orderserviceapi.clients.UserServiceFeignClient;
 import br.com.renanalencar.orderserviceapi.entities.Order;
 import br.com.renanalencar.orderserviceapi.mapper.OrderMapper;
 import br.com.renanalencar.orderserviceapi.repositories.OrderRepository;
@@ -10,6 +11,7 @@ import models.exceptions.ResourceNotFoundException;
 import models.requests.CreateOderRequest;
 import models.requests.UpdateOrderRequest;
 import models.responses.OrderResponse;
+import models.responses.UserResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -27,6 +29,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository repository;
     private final OrderMapper mapper;
+    private final UserServiceFeignClient userServiceFeignClient;
 
     @Override
     public Order findById(final Long id) {
@@ -36,6 +39,12 @@ public class OrderServiceImpl implements OrderService {
     }
     @Override
     public void save(CreateOderRequest request) {
+        final var requester = validateUserId(request.requesterId());
+        final var customer = validateUserId(request.customerId());
+
+        log.info("Requester validated: {}", requester);
+        log.info("Customer validated: {}", customer);
+
         final var entity = repository.save(mapper.fromRequest(request));
         log.info("Order saved: {}", entity);
     }
@@ -69,5 +78,9 @@ public class OrderServiceImpl implements OrderService {
                 orderBy
         );
         return repository.findAll(pageRequest);
+    }
+
+    UserResponse validateUserId(final String id){
+        return userServiceFeignClient.findById(id).getBody();
     }
 }
