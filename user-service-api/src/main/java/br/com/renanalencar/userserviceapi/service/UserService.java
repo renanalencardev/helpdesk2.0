@@ -54,7 +54,7 @@ public class UserService {
     private User find(final String id){
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Objeto não encontrado. Id: " + id + ", Tipo: " + UserResponse.class.getSimpleName()));
+                        "Usuário não encontrado. Id: " + id + ", Tipo: " + UserResponse.class.getSimpleName()));
     }
 
     private void verifyIfEmailExists(final String email, final String id) {
